@@ -774,33 +774,33 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
             history_count--;
             free(history[history_len]);
             if (mlmode) linenoiseEditMoveEnd(&l);
-	    {
-	      char* current = l.buf;
+            {
+                char* current = l.buf;
 
-	      while (isspace(*current))
-		current++;
-	      if (*current == '!') {
-		char* endptr;
-		int index = strtol(current + 1, &endptr, 10);
-		char* entry = NULL;
+                while (isspace(*current))
+                    current++;
+                if (*current == '!') {
+                    char* endptr;
+                    int index = strtol(current + 1, &endptr, 10);
+                    char* entry = NULL;
 
-		if (*endptr == '\0') {
-		  if ((index < 0) && (abs(index) <= history_len))
-		    entry = history[history_len + index];
-		  else if ((index > 0) && (index >= (history_count - history_len)) && (index <= history_count))
-		    entry = history[index - history_count + history_len - 1];
-		}
-		if (entry) {
-		  strncpy(l.buf, entry, l.buflen);
-		  l.buf[l.buflen-1] = '\0';
-		  l.len = strlen(l.buf);
-		}
-		else {
-		  l.buf[0] = '\0';
-		  l.len = 0;
-		}
-	      }
-	    }
+                    if (*endptr == '\0') {
+                        if ((index < 0) && (abs(index) <= history_len))
+                            entry = history[history_len + index];
+                        else if ((index > 0) && (index >= (history_count - history_len)) && (index <= history_count))
+                            entry = history[index - history_count + history_len - 1];
+                    }
+                    if (entry) {
+                        strncpy(l.buf, entry, l.buflen);
+                        l.buf[l.buflen-1] = '\0';
+                        l.len = strlen(l.buf);
+                    }
+                    else {
+                        l.buf[0] = '\0';
+                        l.len = 0;
+                    }
+                }
+            }
             return (int)l.len;
         case CTRL_C:     /* ctrl-c */
             errno = EAGAIN;
