@@ -130,6 +130,10 @@ static int history_len = 0;
 static int history_count = 0;
 static char **history = NULL;
 
+static char* linenoise_word_separators = NULL;
+static unsigned linenoise_word_separators_size = 0;
+
+
 /* The linenoiseState structure represents the state during line editing.
  * We pass this state to functions implementing specific editing
  * functionalities. */
@@ -430,6 +434,13 @@ void linenoiseAddCompletion(linenoiseCompletions *lc, const char *str) {
 
 /* =========================== Line editing ================================= */
 
+/* Allow users to customize characters used as word separators.
+ */
+void linenoiseSetWordSeparators(unsigned size, char* separators) {
+    linenoise_word_separators_size = size;
+    linenoise_word_separators = separators;
+}
+
 /* We define a very simple "append buffer" structure, that is an heap
  * allocated string where we can append to. This is useful in order to
  * write all the escape sequences in a buffer and flush them to the standard
@@ -698,6 +709,21 @@ void linenoiseEditBackspace(struct linenoiseState *l) {
     }
 }
 
+/* Check if character at cursor is word separator.
+ */
+int linenoiseEditIsCharWordSeparator(char c) {
+    if (linenoise_word_separators == NULL)
+        return 0;
+
+    int is_separator = 0;
+    unsigned i;
+    for (i = 0; i < linenoise_word_separators_size; ++i) {
+        if ((is_separator = (linenoise_word_separators[i] == c)))
+            break;
+    }
+    return is_separator;
+}
+
 /* Delete the previous word, maintaining the cursor at the start of the
  * current word. */
 void linenoiseEditDeletePrevWord(struct linenoiseState *l) {
@@ -706,9 +732,9 @@ void linenoiseEditDeletePrevWord(struct linenoiseState *l) {
 
     while (l->pos > 0 && l->buf[l->pos-1] == ' ')
         l->pos--;
-    if (l->pos > 0 && (l->buf[l->pos-1] == '.'))
+    if (l->pos > 0 && linenoiseEditIsCharWordSeparator(l->buf[l->pos-1]))
         l->pos--;
-    while (l->pos > 0 && (l->buf[l->pos-1] != ' ' && l->buf[l->pos-1] != '.'))
+    while (l->pos > 0 && (l->buf[l->pos-1] != ' ' && !linenoiseEditIsCharWordSeparator(l->buf[l->pos-1])))
         l->pos--;
     diff = old_pos - l->pos;
     memmove(l->buf+l->pos,l->buf+old_pos,l->len-old_pos+1);
