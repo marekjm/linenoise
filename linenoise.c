@@ -803,8 +803,12 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
             }
             return (int)l.len;
         case CTRL_C:     /* ctrl-c */
-            errno = EAGAIN;
-            return -1;
+            errno = EAGAIN; /* http://stackoverflow.com/questions/4058368/what-does-eagain-mean
+                             * Set errno as "try again later".
+                             * The action has been cancelled so it is correct behaviour.
+                             */
+            buf[0] = '\0';  /* set buffer to be zero-length */
+            return 0;
         case BACKSPACE:   /* backspace */
         case 8:     /* ctrl-h */
             linenoiseEditBackspace(&l);
