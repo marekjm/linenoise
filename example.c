@@ -39,6 +39,10 @@ int main(int argc, char **argv) {
      * user uses the <tab> key. */
     linenoiseSetCompletionCallback(completion);
 
+    /* Set word separators.
+     */
+    linenoiseSetWordSeparators(1, ".");
+
     /* Load history from file. The history file is just a plain text file
      * where entries are separated by newlines. */
     linenoiseHistoryLoad("history.txt"); /* Load the history at startup */
