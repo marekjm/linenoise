@@ -50,6 +50,9 @@ typedef void(linenoiseCompletionCallback)(const char *, linenoiseCompletions *);
 void linenoiseSetCompletionCallback(linenoiseCompletionCallback *);
 void linenoiseAddCompletion(linenoiseCompletions *, const char *);
 
+typedef int(linenoiseEditCallback)(int, int, char *, size_t, const char *);
+void linenoiseSetEditCallback(linenoiseEditCallback *fn);
+
 void linenoiseSetWordSeparators(unsigned, char*);
 
 char *linenoise(const char *prompt);

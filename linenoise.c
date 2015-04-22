@@ -133,6 +133,8 @@ static char **history = NULL;
 static char* linenoise_word_separators = NULL;
 static unsigned linenoise_word_separators_size = 0;
 
+static linenoiseEditCallback *editCallback = NULL;
+
 
 /* The linenoiseState structure represents the state during line editing.
  * We pass this state to functions implementing specific editing
@@ -433,6 +435,11 @@ void linenoiseAddCompletion(linenoiseCompletions *lc, const char *str) {
 }
 
 /* =========================== Line editing ================================= */
+
+/* Register a callback function to be called for interactive line editing. */
+void linenoiseSetEditCallback(linenoiseEditCallback *fn) {
+    editCallback = fn;
+}
 
 /* Allow users to customize characters used as word separators.
  */
@@ -992,6 +999,9 @@ void linenoisePrintKeyCodes(void) {
 static int linenoiseRaw(char *buf, size_t buflen, const char *prompt) {
     int count;
 
+    /* Determine what function whould be used for interactive editing. */
+    linenoiseEditCallback* edit = (editCallback == NULL ? &linenoiseEdit : editCallback);
+
     if (buflen == 0) {
         errno = EINVAL;
         return -1;
@@ -1007,7 +1017,7 @@ static int linenoiseRaw(char *buf, size_t buflen, const char *prompt) {
     } else {
         /* Interactive editing. */
         if (enableRawMode(STDIN_FILENO) == -1) return -1;
-        count = linenoiseEdit(STDIN_FILENO, STDOUT_FILENO, buf, buflen, prompt);
+        count = (*edit)(STDIN_FILENO, STDOUT_FILENO, buf, buflen, prompt);
         disableRawMode(STDIN_FILENO);
         printf("\n");
     }
